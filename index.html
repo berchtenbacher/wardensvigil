@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="assets/sanctuaryicon.png">
+    <title>Warden's Vigil</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jacquard+24&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script src="game_data.js"></script>
+
+    <style>
+            body {
+                font-family: 'Inter', sans-serif;
+                /* Updated background properties */
+                background-image: url('assets/background2.png');
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+                background-repeat: no-repeat;
+                color: #e5e5e5;
+                overflow-x: hidden;
+            }
+
+            /* Optional: Add a dark overlay to ensure text remains readable */
+            body::before {
+                content: "";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
+                z-index: -1;
+            }
+        .rpg-font { font-family: 'Jacquard 24', serif; letter-spacing: 0.05em; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .pixelated {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes itemPop { 
+            0% { transform: scale(0) rotate(-15deg); opacity: 0; } 
+            50% { transform: scale(1.1) rotate(5deg); opacity: 1; } 
+            100% { transform: scale(1) rotate(0); opacity: 1; } 
+        }
+        .animate-item-pop { animation: itemPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        @keyframes radiantClick {
+            0% { box-shadow: 0 0 0px rgba(234, 179, 8, 0); background: rgba(17, 24, 39, 0.6); }
+            30% { box-shadow: 0 0 40px rgba(234, 179, 8, 0.8); background: rgba(234, 179, 8, 0.15); border-color: #fbbf24; }
+            100% { box-shadow: 0 0 0px rgba(234, 179, 8, 0); background: rgba(17, 24, 39, 0.6); }
+        }
+        .animate-radiant { animation: radiantClick 0.6s ease-out forwards; }
+
+        @keyframes textGlow {
+            0%, 100% { text-shadow: 0 0 5px rgba(250, 204, 21, 0.3); opacity: 0.8; }
+            50% { text-shadow: 0 0 15px rgba(250, 204, 21, 0.8); opacity: 1; }
+        }
+        .animate-text-glow { animation: textGlow 3s infinite ease-in-out; }
+
+        /* --- COLOR THEMES --- */
+
+        /* GOLD: Level Ups / Default */
+        .glowing-gold {
+            border: 1px solid rgba(234, 179, 8, 0.5);
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.2), inset 0 0 20px rgba(0,0,0,0.6);
+            background: linear-gradient(180deg, rgba(35, 30, 15, 0.98) 0%, rgba(10, 10, 12, 1) 100%);
+        }
+        .glowing-gold .icon-color { color: #fbbf24; }
+
+        /* RED: Item Gains */
+        .glowing-red {
+            border: 1px solid rgba(220, 38, 38, 0.5);
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.2), inset 0 0 20px rgba(0,0,0,0.6);
+            background: linear-gradient(180deg, rgba(40, 10, 10, 0.98) 0%, rgba(10, 10, 12, 1) 100%);
+        }
+        .glowing-red .icon-color { color: #ef4444; }
+
+        /* SILVER: Random Events */
+        .glowing-silver {
+            border: 1px solid rgba(200, 200, 220, 0.5);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(0,0,0,0.6);
+            background: linear-gradient(180deg, rgba(30, 30, 40, 0.98) 0%, rgba(10, 10, 12, 1) 100%);
+            animation: silverShimmer 3s infinite ease-in-out;
+        }
+        .glowing-silver .icon-color { color: #e2e8f0; }
+
+        @keyframes silverShimmer {
+            0%, 100% { border-color: rgba(200, 200, 220, 0.4); }
+            50% { border-color: rgba(255, 255, 255, 0.8); box-shadow: 0 0 30px rgba(255, 255, 255, 0.2); }
+        }
+
+        /* GREEN: Nature / Growth Events */
+        .glowing-green {
+            border: 1px solid rgba(5, 171, 18, 0.5);
+            /* Changed box-shadow to green for a real glow */
+            box-shadow: 0 0 20px rgba(5, 171, 18, 0.2), inset 0 0 20px rgba(0,0,0,0.6);
+            /* Darker green background gradient */
+            background: linear-gradient(180deg, rgba(15, 35, 20, 0.98) 0%, rgba(10, 10, 12, 1) 100%);
+            /* Use the NEW green animation below */
+            animation: greenShimmer 3s infinite ease-in-out;
+        }
+        .glowing-green .icon-color { color: #05ab12; }
+
+        /* New Green Animation */
+        @keyframes greenShimmer {
+            0%, 100% { border-color: rgba(5, 171, 18, 0.4); }
+            50% { border-color: rgba(34, 197, 94, 0.8); box-shadow: 0 0 30px rgba(34, 197, 94, 0.3); }
+        }
+
+        .img-placeholder {
+            border: 2px dashed #444;
+            display: flex; align-items: center; justify-content: center;
+            color: #666; font-size: 10px; font-family: monospace; background: rgba(0,0,0,0.3);
+        }
+
+        /* Modal Overlay */
+        .modal-enter { opacity: 0; transform: scale(0.9); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: all 0.3s ease-out; }
+    </style>
+</head>
+<body class="h-screen w-full relative">
+
+    <header class="fixed top-0 left-0 w-full p-6 flex justify-between items-start z-30 pointer-events-none">
+        <div class="pointer-events-auto mt-2 w-full absolute left-0 top-6 text-center z-0">
+            <h1 class="rpg-font text-4xl text-yellow-600/90 drop-shadow-lg">Warden's Vigil</h1>
+        </div>
+        <div class="pointer-events-auto flex gap-3 absolute right-6 top-6 z-10">
+            <button onclick="triggerRandomEvent()" class="p-3 bg-red-900/20 border border-red-900/40 rounded-lg hover:bg-red-900/40 transition-all opacity-50 hover:opacity-100"><i data-lucide="zap" class="w-6 h-6 text-red-500"></i></button>
+            <button onclick="openMenu('sanctuary')" class="group p-3 bg-black/40 border border-yellow-900/30 rounded-lg hover:border-yellow-600/60 hover:bg-yellow-900/10 transition-all"><i data-lucide="flame" class="w-6 h-6 text-orange-500 group-hover:text-yellow-500 transition-colors"></i></button>
+            <button onclick="openMenu('profile')" class="group p-3 bg-black/40 border border-gray-700/30 rounded-lg hover:border-gray-500 hover:bg-gray-800/40 transition-all"><i data-lucide="scroll" class="w-6 h-6 text-yellow-300 group-hover:text-white transition-colors"></i></button>
+            <button onclick="openMenu('config')" class="group p-3 bg-black/40 border border-gray-700/30 rounded-lg hover:border-gray-500 hover:bg-gray-800/40 transition-all"><i data-lucide="plus" class="w-6 h-6 text-grey-500 group-hover:text-white transition-colors"></i></button>
+        </div>
+    </header>
+
+    <main class="h-full w-full flex flex-col items-center justify-center pt-24 px-4 pb-10">
+        <div id="vice-container" class="w-full max-w-md space-y-4 overflow-y-auto no-scrollbar pr-1" style="max-height: 80vh;">
+            </div>
+    </main>
+
+    <div id="menu-overlay" onclick="closeMenu()" class="fixed inset-0 bg-black/80 opacity-0 pointer-events-none transition-opacity duration-300 z-40 backdrop-blur-sm"></div>
+    <aside id="side-menu" class="fixed top-0 right-0 h-full w-full max-w-sm bg-[#0c0c0e] border-l border-white/10 z-50 translate-x-full shadow-2xl flex flex-col transition-transform duration-300">
+        <div class="p-6 border-b border-white/5 flex justify-between items-center bg-black/20">
+            <h2 id="menu-title" class="rpg-font text-3xl text-gray-200">Menu</h2>
+            <button onclick="closeMenu()" class="p-2 hover:bg-white/10 rounded-lg"><i data-lucide="x" class="text-gray-500"></i></button>
+        </div>
+        <div id="menu-content" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
+    </aside>
+
+    <div id="popup-layer" class="fixed inset-0 flex items-center justify-center pointer-events-none z-[100] px-8"></div>
+    <div id="event-modal-layer" class="fixed inset-0 flex items-center justify-center pointer-events-auto z-[110] px-6 hidden bg-black/80 backdrop-blur-sm"></div>
+
+<script>
+    // 1. STATE MANAGEMENT
+    const defaultState = {
+        xp: 0,
+        level: 1,
+        activeVices: [],
+        inventory: ['warden_cloak'],
+        journalPages: [],
+        hasSeenWelcome: false,
+        lastCheckIn: Date.now()
+    };
+
+    let state = JSON.parse(localStorage.getItem('warden_save')) || defaultState;
+
+    // Safety checks
+    if (typeof state.hasSeenWelcome === 'undefined') state.hasSeenWelcome = false;
+    if (!state.activeVices) state.activeVices = [];
+    if (!state.inventory) state.inventory = ['warden_cloak'];
+    if (!state.journalPages) state.journalPages = [];
+
+    function saveState() {
+        localStorage.setItem('warden_save', JSON.stringify(state));
+    }
+
+    function updateUI() {
+        renderVices();
+        const levelDisplay = document.querySelector('.rpg-font.text-2xl.text-yellow-500');
+        if (levelDisplay) levelDisplay.innerText = `Lanthorn Level ${state.level}`;
+    }
+
+    // 2. CORE GAMEPLAY LOGIC
+    function checkLevelUp() {
+        const nextLevelXP = getXPNeeded(state.level);
+        if (state.xp >= nextLevelXP) {
+            state.level++;
+            playSound('levelUp');
+
+            // Unlock Story Fragment
+            const story = GAME_DATA.journalEntries.find(e => e.unlockLevel === state.level);
+            if (story) unlockJournalPage(story.id);
+
+            // Item Milestone Check
+            if (GAME_DATA.config.itemMilestones.includes(state.level)) {
+                grantRandomItem();
+            }
+
+            queueNotification('popup', {
+                title: "Level Up!",
+                text: `Your Lanthorn glows brighter. You are now Level ${state.level}.`,
+                img: "assets/levelup.png", // Added placeholder image
+                colorClass: "glowing-gold"
+            });
+
+            saveState();
+            updateUI();
+            checkLevelUp(); 
+        }
+    }
+
+    function handlePressOn(viceId) {
+        if (!state.hasSeenWelcome) {
+            if (GAME_DATA.welcomeEvent) renderModal(GAME_DATA.welcomeEvent);
+            state.hasSeenWelcome = true;
+            state.lastCheckIn = Date.now();
+            saveState();
+            return; 
+        }
+
+        const now = Date.now();
+        const hoursElapsed = (now - state.lastCheckIn) / (1000 * 60 * 60);
+        if (hoursElapsed < 0.00003) return; 
+
+        let gainedXP = 30; 
+        state.xp += gainedXP;
+
+        const vice = state.activeVices.find(v => v.id === viceId);
+        if (vice) {
+            vice.currentXP = (vice.currentXP || 0) + gainedXP;
+        }
+
+        state.lastCheckIn = now;
+        playSound('uiClick');
+        showToast(`+${gainedXP} Willpower`);
+
+        if (Math.random() < GAME_DATA.config.eventTriggerChance) triggerRandomEvent();
+
+        checkLevelUp();
+        saveState();
+        updateUI();
+    }
+
+    function grantRandomItem() {
+        const unowned = GAME_DATA.artifacts.filter(a => !state.inventory.includes(a.id));
+        if (unowned.length === 0) return;
+        const item = unowned[Math.floor(Math.random() * unowned.length)];
+        state.inventory.push(item.id);
+        
+        queueNotification('popup', {
+            title: "Artifact Found",
+            text: `You discovered: ${item.name}`,
+            img: item.img, // Now uses the item's actual PNG
+            sound: 'itemGain',
+            colorClass: 'glowing-red',
+            duration: 5000 // Lasts longer (5 seconds)
+        });
+    }
+
+    function unlockJournalPage(pageId) {
+        if (!state.journalPages.includes(pageId)) {
+            state.journalPages.push(pageId);
+            queueNotification('popup', {
+                title: "Journal Page",
+                text: "A new tattered page has been recovered.",
+                icon: "book",
+                colorClass: 'glowing-red'
+            });
+        }
+    }
+
+    function consultOracle() {
+        const config = GAME_DATA.oracleConfig;
+        const randomMessage = config.messages[Math.floor(Math.random() * config.messages.length)];
+        
+        const oracleEvent = {
+            id: "oracle_popup", // This ID is now handled in resolveEvent
+            title: "The Oracle Speaks",
+            description: randomMessage,
+            img: config.img,
+            colorClass: "glowing-gold", 
+            options: [
+                { 
+                    label: "Absorb the Wisdom", 
+                    effect: "xp", 
+                    value: 20, 
+                    resultText: "The monolith hums. Your resolve strengthens." 
+                }
+            ]
+        };
+        renderModal(oracleEvent);
+    }
+
+    function triggerRandomEvent() {
+        const event = GAME_DATA.randomEvents[Math.floor(Math.random() * GAME_DATA.randomEvents.length)];
+        const theme = event.colorClass || 'glowing-silver';
+        // Pass a copy of the event object to renderModal
+        renderModal({ ...event, colorClass: theme });
+    }
+
+    // 3. UI HELPERS & NOTIFICATIONS
+    let notificationQueue = [];
+    let isDisplayingNotification = false;
+
+    function queueNotification(type, data) {
+        notificationQueue.push({ type, data });
+        processQueue();
+    }
+
+    function processQueue() {
+        if (isDisplayingNotification || notificationQueue.length === 0) return;
+        isDisplayingNotification = true;
+        const next = notificationQueue.shift();
+        if (next.type === 'popup') renderPopup(next.data);
+        else if (next.type === 'modal') renderModal(next.data);
+    }
+
+    function renderPopup(data) {
+        const layer = document.getElementById('popup-layer');
+        const el = document.createElement('div');
+        
+        // Check if we have an Image OR an Icon
+        const visualContent = data.img 
+            ? `<img src="${data.img}" class="w-16 h-16 mx-auto mb-2 pixelated object-contain">` 
+            : (data.icon ? `<div class="flex justify-center mb-3"><i data-lucide="${data.icon}" class="w-8 h-8 icon-color"></i></div>` : '');
+
+        el.className = `animate-item-pop ${data.colorClass || 'glowing-gold'} text-white p-6 rounded-xl max-w-xs text-center mb-4`;
+        el.innerHTML = `
+            ${visualContent}
+            <h2 class="rpg-font text-3xl mb-2">${data.title}</h2>
+            <p class="text-sm text-gray-300">${data.text}</p>`;
+            
+        layer.appendChild(el);
+        if(!data.img && data.icon) lucide.createIcons(); // Only create icons if we used one
+        
+        if(data.sound) playSound(data.sound);
+        
+        // Use custom duration or default to 3s
+        const showTime = data.duration || 3000;
+        
+        setTimeout(() => {
+            el.style.opacity = '0';
+            setTimeout(() => { el.remove(); isDisplayingNotification = false; processQueue(); }, 500);
+        }, showTime);
+    }
+
+    function renderModal(event) {
+        const modal = document.getElementById('event-modal-layer');
+        const eventImage = event.img ? `<img src="${event.img}" class="w-32 h-32 mx-auto mb-4 pixelated object-contain">` : '';
+
+        modal.innerHTML = `
+            <div class="${event.colorClass || 'glowing-silver'} p-8 rounded-xl max-w-sm w-full text-center relative shadow-2xl">
+                ${eventImage}
+                <h2 class="rpg-font text-4xl text-gray-100 mb-4">${event.title}</h2>
+                <p class="text-gray-300 italic mb-8 leading-relaxed">${event.description}</p>
+                <div class="flex flex-col gap-3">
+                    ${event.options.map((opt, idx) => `
+                        <button onclick="resolveEvent('${event.id}', ${idx})" class="py-3 px-4 bg-white/5 border border-white/10 text-gray-200 rounded uppercase text-xs hover:bg-white/10 transition-colors">
+                            ${opt.label}
+                        </button>`).join('')}
+                </div>
+            </div>`;
+        modal.classList.remove('hidden');
+        playSound('event');
+    }
+
+    window.resolveEvent = (eventId, optionIndex) => {
+        let event;
+
+        // FIXED: Check for Oracle first
+        if (eventId === "oracle_popup") {
+             // Reconstruct a simple object for the logic, or we could store the active event globally.
+             // Since Oracle effects are consistent, we can just grab the rewards manually here.
+             // But to keep it generic, we know Oracle option 0 is always XP +20.
+             event = { options: [{ effect: 'xp', value: 20, resultText: "The monolith hums. Your resolve strengthens." }] };
+        } else {
+            // Check Random Events
+            event = GAME_DATA.randomEvents.find(e => e.id === eventId);
+            // Check Welcome Event
+            if (!event && GAME_DATA.welcomeEvent.id === eventId) event = GAME_DATA.welcomeEvent;
+        }
+        
+        if (!event) return; 
+
+        const choice = event.options[optionIndex];
+        document.getElementById('event-modal-layer').classList.add('hidden');
+        
+        if (choice.effect === 'xp') {
+            if (state.activeVices.length > 0) {
+                state.activeVices[0].currentXP += choice.value;
+            }
+            state.xp += choice.value;
+        } else if (choice.effect === 'item_chance') {
+            if (Math.random() < choice.value) grantRandomItem();
+        }
+
+        isDisplayingNotification = false; 
+        
+        // FIXED: No icon for resolved events
+        queueNotification('popup', {
+            title: "Event Resolved",
+            text: choice.resultText,
+            icon: null, // No icon
+            sound: 'uiClick',
+            colorClass: 'glowing-gold'
+        });
+
+        saveState(); 
+        updateUI(); // Was renderVices, changed to updateUI to catch everything
+        processQueue(); // Ensure queue keeps moving
+    };
+
+    // 4. GENERAL RENDERERS
+    function renderVices() {
+        const container = document.getElementById('vice-container');
+        if (state.activeVices.length === 0) {
+            container.innerHTML = `<div class="text-center px-6"><p class="rpg-font text-6xl text-gray-100 mb-6 opacity-90 leading-tight">"A vexing force has come over this realm..."</p><p class="text-xs text-gray-400 uppercase tracking-widest">Use the (+) menu to identify the Miasma</p></div>`;
+            return;
+        }
+        container.innerHTML = state.activeVices.map(v => `
+            <div class="relative bg-gray-900/60 border border-white/10 p-5 rounded-xl backdrop-blur-sm group hover:border-white/20 transition-all duration-300">
+                <div class="flex justify-between items-end mb-3">
+                    <h3 class="rpg-font text-3xl text-gray-200">${v.loreName}</h3>
+                    <span class="text-[10px] text-yellow-600 uppercase tracking-widest">Level ${v.level || 1}</span>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="handleFalter('${v.id}')" class="flex-1 py-3 bg-white/5 border border-white/5 text-xs text-gray-500 rounded hover:bg-red-900/20 hover:text-red-400 transition-colors">I Faltered</button>
+                    <button onclick="handlePressOn('${v.id}')" class="flex-1 py-3 bg-yellow-900/20 border border-yellow-700/30 text-xs text-yellow-600 rounded hover:bg-yellow-900/40 transition-colors">Press On</button>
+                </div>
+            </div>`).join('');
+        lucide.createIcons();
+    }
+
+    function openMenu(type) {
+        document.getElementById('menu-overlay').classList.remove('opacity-0', 'pointer-events-none');
+        document.getElementById('side-menu').classList.remove('translate-x-full');
+        if (type === 'sanctuary') renderSanctuary();
+        if (type === 'config') renderConfig();
+        if (type === 'profile') renderProfile();
+        playSound('uiClick');
+    }
+    
+    function renderSanctuary() {
+        document.getElementById('menu-title').innerText = "The Sanctuary";
+        const randomMsg = GAME_DATA.companionMessages[Math.floor(Math.random() * GAME_DATA.companionMessages.length)];
+        
+        document.getElementById('menu-content').innerHTML = `
+            <div class="text-center space-y-8 -mt-2">
+                <div class="w-64 h-64 mx-auto rounded-full border-2 border-yellow-800/50 bg-yellow-900/10 shadow-[0_0_30px_rgba(234,179,8,0.2)] overflow-hidden flex items-center justify-center">
+                    <img src="assets/sanctuary.png" class="w-full h-full object-cover opacity-90" alt="Ancient Temple">
+                </div>
+                <button onclick="consultOracle()" class="w-full py-4 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 uppercase tracking-widest text-xs">Consult the Oracle</button>
+                <div class="pt-6 border-t border-white/10">
+                    <p class="rpg-font text-xl animate-text-glow text-yellow-500/80 leading-relaxed">"${randomMsg}"</p>
+                </div>
+            </div>`;
+    }
+
+    function renderProfile() {
+        document.getElementById('menu-title').innerText = "Warden's Pack";
+        const foundArtifacts = GAME_DATA.artifacts.filter(a => state.inventory.includes(a.id));
+        const journalHtml = state.journalPages.map(id => {
+            const e = GAME_DATA.journalEntries.find(entry => entry.id === id);
+            return `<div class="p-4 bg-yellow-900/10 border border-yellow-900/30 rounded-lg mb-3"><h4 class="rpg-font text-xl text-yellow-600">${e.title}</h4><p class="text-xs text-gray-400 italic">"${e.text}"</p></div>`;
+        }).join('');
+        
+        // ADDED LANTHORN IMAGE HERE
+        document.getElementById('menu-content').innerHTML = `
+            <div class="flex justify-center mb-6">
+                <img src="assets/lanthorn.png" class="w-24 h-24 object-contain pixelated drop-shadow-lg">
+            </div>
+            <h3 class="rpg-font text-2xl text-yellow-500 text-center mb-6">Level ${state.level}</h3>
+            
+            <h3 class="text-xs uppercase tracking-widest text-gray-500 mb-2">Artifacts</h3>
+            <div class="grid grid-cols-4 gap-2 mb-8">${foundArtifacts.map(a => `<img src="${a.img}" class="bg-white/5 rounded border border-white/10 w-full" title="${a.name}">`).join('')}</div>
+            
+            <h3 class="text-xs uppercase tracking-widest text-gray-500 mb-2">Journal</h3>
+            <div>${journalHtml || '<p class="text-xs italic text-gray-600">The pages are blank...</p>'}</div>`;
+    }
+
+    function renderConfig() {
+        document.getElementById('menu-title').innerText = "Identify Miasma";
+        const list = state.activeVices.map(v => `<div class="flex justify-between p-3 bg-white/5 border border-white/5 rounded"><div><p class="text-sm text-gray-200">${v.displayName}</p></div><button onclick="removeVice('${v.id}')" class="text-red-500 hover:text-red-400">X</button></div>`).join('');
+        document.getElementById('menu-content').innerHTML = `<div class="space-y-4"><div class="flex gap-2"><input type="text" id="new-vice-input" class="w-full bg-black border border-gray-700 text-white p-3 rounded text-sm placeholder-gray-600" placeholder="e.g. Sugar"><button onclick="addVice()" class="p-3 bg-gray-800 rounded hover:bg-gray-700 transition-colors">+</button></div><div class="space-y-2">${list}</div><button onclick="factoryReset()" class="w-full py-3 bg-red-900/10 text-red-700 text-xs hover:bg-red-900/20 transition-colors mt-8">Factory Reset</button></div>`;
+        lucide.createIcons();
+    }
+
+    // --- UTILS ---
+    const playSound = (k) => { if(GAME_DATA.audio && GAME_DATA.audio[k]) new Audio(GAME_DATA.audio[k]).play().catch(()=>{}); };
+    function getXPNeeded(l) { return Math.floor(GAME_DATA.config.baseXP * Math.pow(GAME_DATA.config.xpMultiplier, l - 1)); }
+    function showToast(t) { queueNotification('popup', { title: "Progress", text: t, colorClass: "glowing-gold" }); }
+    function closeMenu() { document.getElementById('menu-overlay').classList.add('opacity-0', 'pointer-events-none'); document.getElementById('side-menu').classList.add('translate-x-full'); }
+    function factoryReset() { if(confirm("Reset?")) { localStorage.removeItem('warden_save'); location.reload(); } }
+    
+    function addVice() {
+        const i = document.getElementById('new-vice-input');
+        const name = i.value.trim(); if(!name) return;
+        const type = Object.keys(GAME_DATA.viceKeywords).find(k => GAME_DATA.viceKeywords[k].some(w => name.toLowerCase().includes(w))) || 'default';
+        state.activeVices.push({ id: Date.now(), displayName: name, loreName: GAME_DATA.loreLibrary[type].name, currentXP: 0 });
+        i.value = ''; saveState(); renderConfig(); renderVices();
+    }
+
+    function removeVice(id) { state.activeVices = state.activeVices.filter(v => v.id != id); saveState(); renderConfig(); renderVices(); }
+
+    function handleFalter(id) { queueNotification('popup', { title: "Rest Now", text: GAME_DATA.falterMessages[0], icon: "moon" }); }
+
+    window.onload = () => { updateUI(); lucide.createIcons(); };
+</script>
+</body>
+</html>
