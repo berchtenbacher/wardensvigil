@@ -42,17 +42,20 @@ const GAME_DATA = {
         tv: ['tv', 'netflix', 'series', 'movie', 'stream', 'youtube', 'watch', 'hbo', 'disney', 'binge'],
         junk: ['junk', 'fast food', 'burger', 'pizza', 'fries', 'mcdonalds', 'kfc', 'takeout', 'grease'],
         gaming: ['game', 'entertainment','steam', 'playstation', 'xbox', 'nintendo', 'switch', 'league', 'wow', 'fortnite'],
+        mp: ['mp', 'pm'],
+        obsession: ['obsessive', 'obsession'],
         shopping: ['shop', 'buy', 'amazon', 'spend', 'money', 'sale', 'cart']
     },
 
     loreLibrary: {
         sugar: { name: "Moonlight Glimmer", icon: "droplets", desc: "A deceptive dew that crystallizes on corrupted roots." },
         social: { name: "The Siren's Mirror", icon: "cast", desc: "A glass reflecting only what you lack." },
-        tv: { name: "The Twilight Spell", icon: "clapperboard", desc: "An endless haze that steals the sun." },
-        junk: { name: "The Alchemist's Sludge", icon: "utensils", desc: "Coarse fuel that weighs down the soul." },
+        tv: { name: "The Twilight Hex", icon: "clapperboard", desc: "An endless haze that steals the sun." },
+        junk: { name: "The Poisoner's Sludge", icon: "utensils", desc: "Coarse fuel that weighs down the soul." },
         gaming: { name: "The Gilded Labyrinth", icon: "gamepad-2", desc: "Victories that vanish like smoke upon waking." },
         shopping: { name: "The Merchant's Curse", icon: "coins", desc: "Gold that turns to dust in your hands." },
         mp: { name: "The Primeval Ruin", icon: "coins", desc: "A curse placed deep inside." },
+        obsession: { name: "The Clarion Whisper", icon: "coins", desc: "A demanding voice." },
         default: { name: "The Grey Mist", icon: "cloud-fog", desc: "A formless shape that obscures the path." }
     },
 
