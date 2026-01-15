@@ -12,8 +12,8 @@ const GAME_DATA = {
     
         welcomeEvent: {
                 id: "tutorial_start",
-                title: "The Oath of the Warden",
-                description: "You stand at the edge of the Miasma. The path ahead is obscured, but your Lanthorn is lit.\n\n<strong style='color:#fbbf24'>HOW TO SURVIVE:</strong>\n1. <strong>Resist Vices:</strong> Select a habit to track. Every moment you resist builds Willpower.\n2. <strong>Press On:</strong> Click the button to log your time. This grants XP and lights your way.\n3. <strong>The Lanthorn:</strong> As you level up, the fog recedes and artifacts may be found.",
+                title: "The Warden's Path",
+                description: "You stand at the edge of a faint mist: <br><strong> The Miasma</strong><br><br> Adds vices - this identifies the miasma. Every moment you resist builds willpower. In times of doubt come back to rest before giving in. Either press on with the journey, take a break, consult the oracle, find artifacts and learn about the origin of the miasma. As you level up, the light of your lanthorn becomes stronger and drives away the mist.",
                 colorClass: "glowing-gold",
                 options: [
                     { 
@@ -41,7 +41,7 @@ const GAME_DATA = {
         social: ['social', 'insta', 'tiktok', 'facebook', 'twitter', 'scroll', 'reddit', 'feed', 'phone'],
         tv: ['tv', 'netflix', 'series', 'movie', 'stream', 'youtube', 'watch', 'hbo', 'disney', 'binge'],
         junk: ['junk', 'fast food', 'burger', 'pizza', 'fries', 'mcdonalds', 'kfc', 'takeout', 'grease'],
-        gaming: ['game', 'steam', 'playstation', 'xbox', 'nintendo', 'switch', 'league', 'wow', 'fortnite'],
+        gaming: ['game', 'entertainment','steam', 'playstation', 'xbox', 'nintendo', 'switch', 'league', 'wow', 'fortnite'],
         shopping: ['shop', 'buy', 'amazon', 'spend', 'money', 'sale', 'cart']
     },
 
@@ -49,9 +49,10 @@ const GAME_DATA = {
         sugar: { name: "Moonlight Glimmer", icon: "droplets", desc: "A deceptive dew that crystallizes on corrupted roots." },
         social: { name: "The Siren's Mirror", icon: "cast", desc: "A glass reflecting only what you lack." },
         tv: { name: "The Twilight Spell", icon: "clapperboard", desc: "An endless haze that steals the sun." },
-        junk: { name: "Alchemist's Sludge", icon: "utensils", desc: "Coarse fuel that weighs down the soul." },
+        junk: { name: "The Alchemist's Sludge", icon: "utensils", desc: "Coarse fuel that weighs down the soul." },
         gaming: { name: "The Gilded Labyrinth", icon: "gamepad-2", desc: "Victories that vanish like smoke upon waking." },
         shopping: { name: "The Merchant's Curse", icon: "coins", desc: "Gold that turns to dust in your hands." },
+        mp: { name: "The Primeval Ruin", icon: "coins", desc: "A curse placed deep inside." },
         default: { name: "The Grey Mist", icon: "cloud-fog", desc: "A formless shape that obscures the path." }
     },
 
